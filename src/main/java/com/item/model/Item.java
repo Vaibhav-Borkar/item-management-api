@@ -19,10 +19,11 @@ public class Item {
 	@NotBlank(message = "Description is required")
 	private String description;
 
-	@NotNull
+	@NotNull(message = "Price is required")
 	@Positive
 	private Double price;
 
+	@NotNull(message = "Quantity is required")
 	@Positive
 	private Integer quantity;
 

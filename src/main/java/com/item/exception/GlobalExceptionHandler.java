@@ -9,10 +9,12 @@ package com.item.exception;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -40,7 +42,24 @@ public class GlobalExceptionHandler {
 		body.put("timestamp", LocalDateTime.now());
 		body.put("status", HttpStatus.NOT_FOUND.value());
 		body.put("message", e.getMessage());
-		return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+	    Map<String, Object> response = new HashMap<>();
+	    Map<String, String> errors = new HashMap<>();
+
+	    // Extracting only the field name and the error message
+	    ex.getBindingResult().getFieldErrors().forEach(error -> 
+	        errors.put(error.getField(), error.getDefaultMessage())
+	    );
+
+	    response.put("timestamp", LocalDateTime.now());
+	    response.put("status", HttpStatus.BAD_REQUEST.value());
+	    response.put("errors", errors); // This will show "name": "Item name is required"
+
+	    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 	}
 
 }
